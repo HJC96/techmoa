@@ -109,4 +109,5 @@ graph LR
 - [System Architecture 상세](./docs/ARCHITECTURE.md)
 - [API Specification](./docs/API_SPEC.md)
 - [Ingestion Playbook](./docs/INGESTION_PLAYBOOK.md)
+- [인수인계/재기동 가이드](./docs/HANDOVER_RUNBOOK.md)
 - [Project Log & Checklist](./docs/TECHMOA_PROJECT_LOG.md)
