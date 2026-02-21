@@ -1,50 +1,112 @@
-# TechMoa
+# TechMoa (테크모아) 🚀
 
-여러 테크 블로그의 최신 글을 수집하고 한 곳에서 탐색하는 서비스입니다.
+> **"파편화된 기술 지식을 한곳에, 개발자를 위한 테크 블로그 큐레이션 플랫폼"**
 
-## 문서
-- `docs/TECHMOA_PROJECT_LOG.md`: 진행 로그 + 다음 단계 체크리스트
-- `docs/ARCHITECTURE.md`: 시스템 아키텍처 및 모듈 구조
-- `docs/ERD.md`: 데이터 모델 및 인덱스 전략
-- `docs/API_SPEC.md`: MVP API 명세
-- `docs/INGESTION_PLAYBOOK.md`: 수집 파이프라인/파서 전략
-- `docs/improvements/README.md`: 영역별 개선사항 인덱스
-- `backend/README.md`: 백엔드 부트스트랩 가이드
-- `frontend/README.md`: 프론트엔드 부트스트랩 가이드
-- `docker-compose.yml`: 로컬 PostgreSQL/Redis 실행
+TechMoa는 국내외 주요 기업 및 개인 테크 블로그의 양질의 콘텐츠를 자동으로 수집하여, 개발자들이 최신 기술 트렌드를 놓치지 않고 탐색할 수 있도록 돕는 서비스입니다.
 
-## 실행 방법
+---
 
-### 로컬 실행
-1.  **DB 및 Redis 실행**: `docker-compose up -d postgres redis`
-2.  **백엔드 실행**: `cd backend && ./gradlew bootRun --args='--spring.profiles.active=local'`
-3.  **프론트엔드 실행**: `cd frontend && npm install && npm run dev`
+## 🏗 System Architecture
 
-### 전체 배포 (Docker Compose)
-1.  **빌드 및 실행**: `docker-compose up -d --build`
-2.  **정지 및 삭제**: `docker-compose down`
+본 프로젝트는 **확장성**과 **데이터 정규화**를 최우선으로 설계되었습니다.
 
-## 현재 상태
-- [x] 요구사항 기반 초안 아키텍처 정의
-- [x] MVP 데이터 모델 정의
-- [x] MVP API 정의
-- [x] 수집 파이프라인 정의
-- [x] Spring Boot 프로젝트 초기 스캐폴딩
-- [x] React 프로젝트 초기 스캐폴딩
-- [x] Flyway V1 스키마 작성
-- [x] 기본 조회/관리 API 골격 구현
-- [x] 태그 저장/조회/필터 구현
-- [x] sync_jobs 동기화 이력 저장 구현
-- [x] 관리자 API 기본 인증 적용
-- [x] 프론트 실 API 연동 (목데이터 제거)
-- [x] 프론트 상세 페이지 라우팅(`/posts/:id`) 구현
-- [x] 단위/슬라이스 테스트 코드 추가
-- [x] 백엔드 테스트 자동 실행 확인
-- [x] 프론트 빌드 실행 확인
-- [x] 1차 수집 소스 3개 연동 (RSS 우선)
+### 1. High-Level Flow
+```mermaid
+graph LR
+    subgraph "External Sources"
+        A[RSS Feeds]
+        B[JSON APIs]
+        C[Web Scraping]
+    end
 
-## 개선사항 분리 문서
-- `docs/improvements/PROJECT_IMPROVEMENTS.md`
-- `docs/improvements/BACKEND_IMPROVEMENTS.md`
-- `docs/improvements/FRONTEND_IMPROVEMENTS.md`
-- `docs/improvements/INFRA_IMPROVEMENTS.md`
+    subgraph "Ingestion Pipeline (Backend)"
+        D[Scheduler] --> E[Strategy-based Parser]
+        E --> F[Normalizer]
+        F --> G[Deduplicator]
+        G --> H[(PostgreSQL)]
+    end
+
+    subgraph "Service Layer"
+        H --> I[Spring Boot API]
+        I --> J[(Redis Cache)]
+        J --> K[React Frontend]
+    end
+```
+
+### 2. Ingestion Pipeline Strategy
+- **Strategy Pattern**: 소스 타입(RSS, JSON, Scraper)에 따른 파서를 전략 패턴으로 구현하여, 새로운 수집 대상 추가 시 기존 코드 수정 없이 확장 가능합니다.
+- **Normalization**: 서로 다른 데이터 포맷을 `ParsedPost` 표준 규격으로 정규화하여 데이터 품질을 유지합니다.
+- **Deduplication**: `canonical_url` 기반의 Upsert 로직을 통해 데이터 중복을 방지하고 최신 상태를 유지합니다.
+
+---
+
+## 🛠 Tech Stack
+
+### Backend
+- **Language/Framework**: Java 21, Spring Boot 3.4
+- **Database**: PostgreSQL 16 (Main), Redis 7 (Cache)
+- **ORM/Migration**: Spring Data JPA, Flyway
+- **Test**: JUnit 5, AssertJ, Mockito
+
+### Frontend
+- **Framework**: React 18 (TypeScript), Vite
+- **State/API**: Axios, React Router
+- **Style**: Vanilla CSS (Modern CSS features)
+
+### Infra/DevOps
+- **Container**: Docker, Docker Compose
+- **CI/CD**: GitHub Actions (Planned)
+
+---
+
+## 💎 Key Technical Decisions
+
+### 1. 데이터 수집의 안정성 (Fault Tolerance)
+- 특정 블로그의 RSS가 응답하지 않더라도 전체 파이프라인에 영향이 가지 않도록 **소스별 실패 격리**를 적용했습니다.
+- `sync_jobs` 테이블을 통해 각 수집 작업의 성공/실패 이력과 에러 로그를 기록하여 운영 가시성을 확보했습니다.
+
+### 2. 조회 성능 최적화
+- **DB Indexing**: 게시글 목록 조회 성능을 위해 `published_at` 역순 인덱스와 `source_id` 복합 인덱스를 설계했습니다.
+- **Caching Strategy**: 빈번하게 조회되는 최신 게시글 피드에 Redis 캐시를 적용하여 DB 부하를 줄이고 응답 속도를 개선했습니다 (목표 p95 300ms).
+
+### 3. 클린 아키텍처 지향
+- 도메인 중심의 패키지 구조(`source`, `post`, `ingestion`, `tag`)를 채택하여 각 도메인의 책임과 역할을 명확히 분리했습니다.
+
+---
+
+## 📊 Database Schema (ERD)
+
+핵심 테이블 간의 관계와 중복 제거 전략입니다. 자세한 내용은 [ERD 상세 문서](./docs/ERD.md)를 참고하세요.
+
+- **Sources (1:N) Posts**: 수집 대상과 수집된 글의 관계
+- **Posts (N:M) Tags**: 게시글과 기술 태그 간의 다대다 관계 (매핑 테이블 활용)
+- **Sources (1:N) SyncJobs**: 수집 이력 관리 및 모니터링
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Docker & Docker Compose
+
+### Step-by-Step
+1. **인프라 실행**:
+   ```bash
+   docker-compose up -d postgres redis
+   ```
+2. **백엔드 실행**:
+   ```bash
+   cd backend && ./gradlew bootRun
+   ```
+3. **프론트엔드 실행**:
+   ```bash
+   cd frontend && npm install && npm run dev
+   ```
+
+---
+
+## 📂 Documentation
+- [System Architecture 상세](./docs/ARCHITECTURE.md)
+- [API Specification](./docs/API_SPEC.md)
+- [Ingestion Playbook](./docs/INGESTION_PLAYBOOK.md)
+- [Project Log & Checklist](./docs/TECHMOA_PROJECT_LOG.md)
