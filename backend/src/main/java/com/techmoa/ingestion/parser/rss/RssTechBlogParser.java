@@ -1,6 +1,8 @@
 package com.techmoa.ingestion.parser.rss;
 
 import com.rometools.rome.feed.synd.SyndCategory;
+import com.rometools.rome.feed.synd.SyndContent;
+import com.rometools.rome.feed.synd.SyndEnclosure;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.SyndFeedInput;
@@ -15,7 +17,9 @@ import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -57,6 +61,7 @@ public class RssTechBlogParser implements TechBlogParser {
                 entry.getLink(),
                 entry.getDescription() == null ? null : entry.getDescription().getValue(),
                 entry.getAuthor(),
+                resolveThumbnailUrl(entry),
                 resolvePublishedAt(entry.getPublishedDate()),
                 resolveTags(entry.getCategories())
         );
@@ -77,5 +82,71 @@ public class RssTechBlogParser implements TechBlogParser {
                 .map(SyndCategory::getName)
                 .filter(Objects::nonNull)
                 .toList();
+    }
+
+    private String resolveThumbnailUrl(SyndEntry entry) {
+        String enclosureImage = resolveThumbnailFromEnclosures(entry.getEnclosures());
+        if (enclosureImage != null) {
+            return enclosureImage;
+        }
+
+        String descriptionImage = resolveThumbnailFromHtml(
+                entry.getDescription() == null ? null : entry.getDescription().getValue()
+        );
+        if (descriptionImage != null) {
+            return descriptionImage;
+        }
+
+        if (entry.getContents() == null) {
+            return null;
+        }
+
+        for (SyndContent content : entry.getContents()) {
+            String contentImage = resolveThumbnailFromHtml(content == null ? null : content.getValue());
+            if (contentImage != null) {
+                return contentImage;
+            }
+        }
+
+        return null;
+    }
+
+    private String resolveThumbnailFromEnclosures(List<SyndEnclosure> enclosures) {
+        if (enclosures == null) {
+            return null;
+        }
+
+        return enclosures.stream()
+                .filter(Objects::nonNull)
+                .filter(enclosure -> enclosure.getUrl() != null && !enclosure.getUrl().isBlank())
+                .filter(this::isImageEnclosure)
+                .map(SyndEnclosure::getUrl)
+                .map(String::trim)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private boolean isImageEnclosure(SyndEnclosure enclosure) {
+        if (enclosure.getType() == null || enclosure.getType().isBlank()) {
+            return true;
+        }
+        return enclosure.getType().toLowerCase(Locale.ROOT).startsWith("image/");
+    }
+
+    private String resolveThumbnailFromHtml(String html) {
+        if (html == null || html.isBlank()) {
+            return null;
+        }
+
+        String src = Jsoup.parse(html)
+                .select("img[src]")
+                .stream()
+                .map(element -> element.attr("src"))
+                .filter(value -> value != null && !value.isBlank())
+                .map(String::trim)
+                .findFirst()
+                .orElse(null);
+
+        return src == null || src.isBlank() ? null : src;
     }
 }

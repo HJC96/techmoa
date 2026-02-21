@@ -8,6 +8,7 @@
 - `docs/ERD.md`: 데이터 모델 및 인덱스 전략
 - `docs/API_SPEC.md`: MVP API 명세
 - `docs/INGESTION_PLAYBOOK.md`: 수집 파이프라인/파서 전략
+- `docs/improvements/README.md`: 영역별 개선사항 인덱스
 - `backend/README.md`: 백엔드 부트스트랩 가이드
 - `frontend/README.md`: 프론트엔드 부트스트랩 가이드
 - `docker-compose.yml`: 로컬 PostgreSQL/Redis 실행
@@ -41,3 +42,9 @@
 - [x] 백엔드 테스트 자동 실행 확인
 - [x] 프론트 빌드 실행 확인
 - [x] 1차 수집 소스 3개 연동 (RSS 우선)
+
+## 개선사항 분리 문서
+- `docs/improvements/PROJECT_IMPROVEMENTS.md`
+- `docs/improvements/BACKEND_IMPROVEMENTS.md`
+- `docs/improvements/FRONTEND_IMPROVEMENTS.md`
+- `docs/improvements/INFRA_IMPROVEMENTS.md`

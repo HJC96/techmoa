@@ -155,5 +155,12 @@
 - [x] AWS EC2 실서버 배포 및 운영 환경 최적화
 - [ ] 통합 테스트 작성 및 E2E 테스트 검토
 
+## 다음 개선 단계 (분리 문서)
+- `docs/improvements/PROJECT_IMPROVEMENTS.md`
+- `docs/improvements/BACKEND_IMPROVEMENTS.md`
+- `docs/improvements/FRONTEND_IMPROVEMENTS.md`
+- `docs/improvements/INFRA_IMPROVEMENTS.md`
+
 ## 확인 필요 이슈
+- **보안 이슈**: 현재 백엔드(8080) 포트가 직접 노출되어 있음. MVP 단계에서 동작 확인을 위해 AWS 보안 그룹을 개방했으나, 운영 고도화 시 Nginx 리버스 프록시를 통한 내부 포워딩으로 전환 필수.
 - 현재 로컬 `gradle` 명령은 네이티브 라이브러리 로딩 오류로 실행 실패 (wrapper로 우회)

@@ -7,6 +7,7 @@ public record PostItemResponse(
         Long id,
         String title,
         String summary,
+        String thumbnailUrl,
         String sourceName,
         String canonicalUrl,
         String publishedAt
@@ -18,6 +19,7 @@ public record PostItemResponse(
                 post.getId(),
                 post.getTitle(),
                 post.getSummary(),
+                post.getThumbnailUrl(),
                 post.getSource().getName(),
                 post.getCanonicalUrl(),
                 post.getPublishedAt().format(FORMATTER)

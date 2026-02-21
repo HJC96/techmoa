@@ -73,3 +73,6 @@
 ## 구현 메모
 - `canonical_url`은 중복 제거의 기준 키
 - `published_at`이 없는 소스는 `fetched_at` 대체 후 품질 경고 로그 남김
+
+## 개선사항 위치
+- 데이터 무결성/성능/보관/마이그레이션 개선 항목은 `docs/improvements/BACKEND_IMPROVEMENTS.md`에서 관리합니다.

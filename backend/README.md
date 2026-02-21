@@ -62,3 +62,18 @@ com.techmoa
 - `src/test/java/com/techmoa/post/application/PostUpsertServiceTest.java`
 - `src/test/java/com/techmoa/source/application/SourceServiceTest.java`
 - `src/test/java/com/techmoa/admin/presentation/AdminSourceControllerSecurityTest.java`
+
+## 단계별 검증 가이드
+1. 로컬 인프라 확인
+- 루트에서 `docker-compose up -d postgres redis` 실행 후 DB/Redis 상태를 확인합니다.
+2. 애플리케이션 기동
+- `./gradlew bootRun --args='--spring.profiles.active=local'`로 서버를 실행합니다.
+3. 기본 API 스모크 테스트
+- `GET /api/sources`, `GET /api/posts?size=5`, `GET /api/tags`를 호출해 200 응답을 확인합니다.
+4. 관리자 API 인증 확인
+- 인증 없이 `/api/admin/**` 요청 시 401, 인증 포함 요청 시 정상 응답을 확인합니다.
+5. 테스트/빌드 확인
+- `./gradlew test`와 `./gradlew build`를 순서대로 실행해 회귀 여부를 점검합니다.
+
+## 개선사항 위치
+- 백엔드 개선 로드맵은 `docs/improvements/BACKEND_IMPROVEMENTS.md`에서 관리합니다.

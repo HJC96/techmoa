@@ -58,3 +58,6 @@ com.techmoa
 1. ingestion 모듈을 별도 워커 서비스로 분리
 2. 메시지 큐(Kafka/RabbitMQ) 도입
 3. 검색 엔진(OpenSearch) 분리
+
+## 7. 개선사항 위치
+- 아키텍처/확장 로드맵은 `docs/improvements/PROJECT_IMPROVEMENTS.md`, `docs/improvements/INFRA_IMPROVEMENTS.md`에서 관리합니다.

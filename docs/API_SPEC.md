@@ -123,3 +123,6 @@ Base URL: `/api`
   "timestamp": "2026-02-20T10:13:21"
 }
 ```
+
+## 개선사항 위치
+- API 계약 개선 항목은 `docs/improvements/BACKEND_IMPROVEMENTS.md`에서 관리합니다.

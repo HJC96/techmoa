@@ -34,3 +34,20 @@
 - `src/pages/PostDetailPage.tsx`
 - `src/styles.css`
 - `src/api/*` (posts/sources/tags API client)
+
+## 단계별 검증 가이드
+1. 의존성 설치 및 실행
+- `npm install`
+- `npm run dev`
+2. 목록 화면 확인
+- 홈(`/`)에서 게시물 목록이 렌더링되는지 확인합니다.
+- `더 보기` 동작으로 커서 기반 추가 로딩이 되는지 확인합니다.
+3. 필터/검색 확인
+- 소스 필터, 태그 필터, 키워드 검색을 각각 적용해 요청 파라미터가 반영되는지 확인합니다.
+4. 상세 페이지 확인
+- 목록 항목 클릭 시 `/posts/:id` 이동과 상세 데이터 렌더링을 확인합니다.
+5. 빌드 검증
+- `npm run build`로 프로덕션 번들 생성 성공 여부를 확인합니다.
+
+## 개선사항 위치
+- 프론트엔드 개선 로드맵은 `docs/improvements/FRONTEND_IMPROVEMENTS.md`에서 관리합니다.

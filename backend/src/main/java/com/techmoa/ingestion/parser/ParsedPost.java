@@ -8,6 +8,7 @@ public record ParsedPost(
         String canonicalUrl,
         String summary,
         String author,
+        String thumbnailUrl,
         LocalDateTime publishedAt,
         List<String> tags
 ) {

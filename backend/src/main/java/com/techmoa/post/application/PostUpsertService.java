@@ -67,17 +67,20 @@ public class PostUpsertService {
                 parsedPost.title(),
                 parsedPost.summary(),
                 parsedPost.author(),
-                null,
+                parsedPost.thumbnailUrl(),
                 publishedAt
         );
     }
 
     private Post updateExisting(Post post, ParsedPost parsedPost, LocalDateTime publishedAt) {
+        String thumbnailUrl = parsedPost.thumbnailUrl() == null || parsedPost.thumbnailUrl().isBlank()
+                ? post.getThumbnailUrl()
+                : parsedPost.thumbnailUrl().trim();
         post.updateFrom(
                 parsedPost.title(),
                 parsedPost.summary(),
                 parsedPost.author(),
-                post.getThumbnailUrl(),
+                thumbnailUrl,
                 publishedAt
         );
         return post;

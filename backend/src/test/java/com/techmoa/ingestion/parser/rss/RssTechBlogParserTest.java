@@ -31,8 +31,10 @@ class RssTechBlogParserTest {
         assertThat(parsedPosts).hasSize(2);
         assertThat(parsedPosts.get(0).title()).isEqualTo("Post A");
         assertThat(parsedPosts.get(0).canonicalUrl()).isEqualTo("https://example.com/a");
+        assertThat(parsedPosts.get(0).thumbnailUrl()).isEqualTo("https://images.example.com/a.png");
         assertThat(parsedPosts.get(0).tags()).containsExactly("Java", "Spring");
         assertThat(parsedPosts.get(1).title()).isEqualTo("Post B");
+        assertThat(parsedPosts.get(1).thumbnailUrl()).isEqualTo("https://images.example.com/b.jpg");
         assertThat(parsedPosts.get(1).tags()).containsExactly("React");
     }
 }

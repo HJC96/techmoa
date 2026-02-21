@@ -11,6 +11,7 @@ export type PostItem = {
   id: number;
   title: string;
   summary: string | null;
+  thumbnailUrl: string | null;
   sourceName: string;
   canonicalUrl: string;
   publishedAt: string; // YYYY-MM-DD
@@ -26,6 +27,7 @@ export type PostDetail = {
   id: number;
   title: string;
   summary: string | null;
+  thumbnailUrl: string | null;
   sourceName: string;
   canonicalUrl: string;
   author: string | null;

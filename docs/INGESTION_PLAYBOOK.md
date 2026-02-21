@@ -45,3 +45,6 @@ public interface TechBlogParser {
 - 최근 24시간 수집 성공률
 - 파싱 실패 Top N 소스
 - 평균 수집 소요시간
+
+## 7. 개선사항 위치
+- 수집 안정화/온보딩/장애 대응 개선 항목은 `docs/improvements/BACKEND_IMPROVEMENTS.md`에서 관리합니다.

@@ -45,6 +45,11 @@ export function PostDetailPage() {
         목록으로
       </Link>
       <article className="panel">
+        {post.thumbnailUrl && (
+          <div className="detail-thumbnail-wrap">
+            <img className="detail-thumbnail" src={post.thumbnailUrl} alt={`${post.title} 썸네일`} loading="lazy" />
+          </div>
+        )}
         <h1>{post.title}</h1>
         <div className="meta">
           <span>{post.sourceName}</span>

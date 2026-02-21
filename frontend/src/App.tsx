@@ -79,7 +79,16 @@ export function App() {
         <ul className="post-list">
           {posts.map((post) => (
             <li key={post.id} className="post-card">
-              <Link to={`/posts/${post.id}`}>
+              <Link className="thumbnail-link" to={`/posts/${post.id}`} aria-label={`${post.title} 상세 보기`}>
+                {post.thumbnailUrl ? (
+                  <img className="post-thumbnail" src={post.thumbnailUrl} alt={`${post.title} 썸네일`} loading="lazy" />
+                ) : (
+                  <div className="post-thumbnail-placeholder">
+                    <span>{post.sourceName}</span>
+                  </div>
+                )}
+              </Link>
+              <Link className="post-title" to={`/posts/${post.id}`}>
                 {post.title}
               </Link>
               <div className="meta">

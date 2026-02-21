@@ -51,6 +51,7 @@ class PostUpsertServiceTest {
                 "https://example.com/post-1",
                 "요약",
                 "작성자",
+                "https://cdn.example.com/thumb-1.png",
                 LocalDateTime.of(2026, 2, 20, 10, 0),
                 List.of("Java", "Spring")
         );
@@ -78,6 +79,7 @@ class PostUpsertServiceTest {
                 "https://example.com/post-1",
                 "요약1",
                 "작성자1",
+                "https://cdn.example.com/first.png",
                 LocalDateTime.of(2026, 2, 20, 10, 0),
                 List.of("Java")
         );
@@ -86,6 +88,7 @@ class PostUpsertServiceTest {
                 "https://example.com/post-1",
                 "요약2",
                 "작성자2",
+                "https://cdn.example.com/updated.png",
                 LocalDateTime.of(2026, 2, 20, 11, 0),
                 List.of("Spring")
         );
@@ -96,6 +99,7 @@ class PostUpsertServiceTest {
         List<Post> posts = postRepository.findAll();
         assertThat(posts).hasSize(1);
         assertThat(posts.get(0).getTitle()).isEqualTo("변경 제목");
+        assertThat(posts.get(0).getThumbnailUrl()).isEqualTo("https://cdn.example.com/updated.png");
         assertThat(tagRepository.findAll()).hasSize(2);
     }
 }
