@@ -50,6 +50,12 @@ services:
     restart: always
     ports:
       - "80:80"
+      - "443:443"  # HTTPS 포트 추가
+    volumes:
+      # 호스트의 인증서 경로를 컨테이너 내부로 연결
+      - /etc/letsencrypt:/etc/letsencrypt
+      # Certbot 인증 과정에서 필요한 임시 파일 경로 공유
+      - /var/www/certbot:/var/www/certbot
     depends_on:
       - backend
 
