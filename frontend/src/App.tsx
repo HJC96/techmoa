@@ -1,3 +1,4 @@
+import type { FormEvent } from "react";
 import { useMemo, useState } from "react";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -45,33 +46,49 @@ function SourceLogoBadge({ sourceName, baseUrl }: SourceLogoBadgeProps) {
 }
 
 export function App() {
-  const [source, setSource] = useState("");
-  const [sourceSearch, setSourceSearch] = useState("");
+  const [selectedSourceIds, setSelectedSourceIds] = useState<number[]>([]);
+  const [titleInput, setTitleInput] = useState("");
+  const [titleQuery, setTitleQuery] = useState("");
 
   const sourceQuery = useQuery({
     queryKey: ["sources"],
     queryFn: fetchSources
   });
 
+  const selectedSourceQueryKey = useMemo(() => [...selectedSourceIds].sort((a, b) => a - b).join("|"), [selectedSourceIds]);
+
   const postQuery = useInfiniteQuery({
-    queryKey: ["posts", source],
-    queryFn: ({ pageParam }) => fetchPosts({ source, size: 20, cursor: pageParam }),
+    queryKey: ["posts", selectedSourceQueryKey, titleQuery],
+    queryFn: ({ pageParam }) => fetchPosts({
+      sourceIds: selectedSourceIds,
+      q: titleQuery,
+      size: 20,
+      cursor: pageParam
+    }),
     initialPageParam: null as number | null,
     getNextPageParam: (lastPage) => lastPage.hasNext ? lastPage.nextCursor : undefined,
   });
 
   const posts = useMemo(() => postQuery.data?.pages.flatMap((page) => page.items) ?? [], [postQuery.data]);
-  const filteredSources = useMemo(() => {
-    const sources = sourceQuery.data ?? [];
-    const normalizedSearch = sourceSearch.trim().toLowerCase();
-    if (!normalizedSearch) {
-      return sources;
-    }
-    return sources.filter((item) => (
-      item.name.toLowerCase().includes(normalizedSearch)
-      || resolveSourceHost(item.baseUrl).toLowerCase().includes(normalizedSearch)
+  const sources = sourceQuery.data ?? [];
+  const selectedSourceNames = useMemo(() => {
+    return sources
+      .filter((item) => selectedSourceIds.includes(item.id))
+      .map((item) => `#${item.name}`);
+  }, [sources, selectedSourceIds]);
+
+  function onTitleSearchSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setTitleQuery(titleInput.trim());
+  }
+
+  function toggleSource(sourceId: number) {
+    setSelectedSourceIds((prev) => (
+      prev.includes(sourceId)
+        ? prev.filter((id) => id !== sourceId)
+        : [...prev, sourceId]
     ));
-  }, [sourceQuery.data, sourceSearch]);
+  }
 
   return (
     <main className="layout">
@@ -84,34 +101,42 @@ export function App() {
         <section className="source-explorer" aria-labelledby="source-explorer-title">
           <div className="source-explorer-head">
             <h2 id="source-explorer-title">연동된 테크 블로그</h2>
-            <span className="source-count">{sourceQuery.data?.length ?? 0}개</span>
+            <div className="source-head-tools">
+              <span className="source-count">{sources.length}개</span>
+              {selectedSourceIds.length > 0 && (
+                <button type="button" className="source-reset" onClick={() => setSelectedSourceIds([])}>
+                  필터 해제
+                </button>
+              )}
+            </div>
           </div>
-          <div className="source-toolbar">
+          <form className="title-search-form" onSubmit={onTitleSearchSubmit}>
             <input
-              className="source-search-input"
+              className="title-search-input"
               type="text"
-              value={sourceSearch}
-              onChange={(e) => setSourceSearch(e.target.value)}
-              placeholder="블로그 이름 또는 도메인 검색"
+              value={titleInput}
+              onChange={(e) => setTitleInput(e.target.value)}
+              placeholder="게시물 제목 검색"
             />
-            {source && (
-              <button type="button" className="source-reset" onClick={() => setSource("")}>
-                필터 해제
-              </button>
-            )}
-          </div>
-          {source && <p className="source-selected">현재 선택: #{source}</p>}
+            <button type="submit" className="title-search-button">검색</button>
+          </form>
+          {selectedSourceIds.length > 0 && (
+            <p className="source-selected">
+              현재 선택: {selectedSourceNames.join(", ")}
+            </p>
+          )}
+          {titleQuery && <p className="source-selected">제목 검색: "{titleQuery}"</p>}
 
           {sourceQuery.isLoading && <p className="source-guide">소스 정보를 불러오는 중...</p>}
           {sourceQuery.isError && <p className="source-guide">소스 정보를 불러오지 못했습니다.</p>}
           {!sourceQuery.isLoading && !sourceQuery.isError && (
             <ul className="source-box-grid">
-              {filteredSources.map((item) => (
+              {sources.map((item) => (
                 <li key={item.id}>
                   <button
                     type="button"
-                    className={`source-box${source === item.name ? " active" : ""}`}
-                    onClick={() => setSource((prev) => prev === item.name ? "" : item.name)}
+                    className={`source-box${selectedSourceIds.includes(item.id) ? " active" : ""}`}
+                    onClick={() => toggleSource(item.id)}
                     title={`${item.name} 필터`}
                   >
                     <div className="source-box-row">

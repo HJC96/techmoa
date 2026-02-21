@@ -2,7 +2,7 @@ import { apiGet } from "./client";
 import type { PostDetail, PostFeed } from "./types";
 
 type FetchPostsParams = {
-  source?: string[];
+  sourceIds?: number[];
   tag?: string;
   q?: string;
   size?: number;
@@ -11,9 +11,9 @@ type FetchPostsParams = {
 
 export function fetchPosts(params: FetchPostsParams): Promise<PostFeed> {
   const query = new URLSearchParams();
-  if (params.source && params.source.length > 0) {
-    params.source.forEach((sourceName) => {
-      query.append("source", sourceName);
+  if (params.sourceIds && params.sourceIds.length > 0) {
+    params.sourceIds.forEach((sourceId) => {
+      query.append("sourceId", String(sourceId));
     });
   }
   if (params.q) {

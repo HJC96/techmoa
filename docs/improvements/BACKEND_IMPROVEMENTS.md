@@ -1,6 +1,20 @@
 # Backend Improvements
 
 ## 최근 반영 이력
+### 2026-02-21. 게시물 조회 다중 소스 OR 필터 API 지원
+1. API 파라미터 확장
+- `backend/src/main/java/com/techmoa/post/presentation/PostController.java`에서 `sourceId`를 `List<Long>`으로 수신
+2. 서비스 정규화 로직 추가
+- `backend/src/main/java/com/techmoa/post/application/PostQueryService.java`에서 소스 ID 목록 정규화(중복 제거/빈 목록 null 처리)
+3. 조회 쿼리 OR 필터 반영
+- `backend/src/main/java/com/techmoa/post/domain/PostRepository.java`에서 `s.id IN :sourceIds` 조건 적용
+- 다중 소스 필터를 별도 쿼리(`findFeedBySourceIds`)로 분리해 안정적으로 OR 조회
+4. 회귀 테스트 추가
+- `backend/src/test/java/com/techmoa/post/domain/PostRepositoryTest.java`에서 다중 소스 OR 조회 검증
+
+검증
+- `backend ./gradlew test` 성공
+
 ### 2026-02-21. RSS 썸네일 파싱 및 API 노출
 1. 수집 모델 확장
 - `backend/src/main/java/com/techmoa/ingestion/parser/ParsedPost.java`에 `thumbnailUrl` 추가

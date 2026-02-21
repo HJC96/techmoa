@@ -7,7 +7,11 @@ Base URL: `/api`
 - 관리자 API(`/admin/**`): HTTP Basic 인증 필요
 
 ## 1. 게시물 목록
-`GET /posts?cursor={cursorId}&size=20&source={sourceName}&tag={tagName}&q={keyword}`
+`GET /posts?cursor={cursorId}&size=20&sourceId={sourceId1}&sourceId={sourceId2}&tag={tagName}&q={keyword}`
+
+참고
+- `sourceId`는 다중 전달 가능하며 OR 조건으로 적용됩니다.
+- `q`는 게시물 제목/요약 검색에 사용됩니다.
 
 구현 상태: `구현 완료`
 
@@ -19,9 +23,10 @@ Base URL: `/api`
       "id": 1201,
       "title": "대규모 트래픽 처리 경험",
       "summary": "메시지 큐 기반으로 처리량을 확장한 사례",
+      "thumbnailUrl": "https://...",
       "sourceName": "토스",
       "canonicalUrl": "https://...",
-      "publishedAt": "2026-02-20T08:00:00"
+      "publishedAt": "2026-02-20"
     }
   ],
   "nextCursor": 1188,
@@ -40,11 +45,12 @@ Base URL: `/api`
   "id": 1201,
   "title": "대규모 트래픽 처리 경험",
   "summary": "메시지 큐 기반으로 처리량을 확장한 사례",
+  "thumbnailUrl": "https://...",
   "sourceName": "토스",
   "canonicalUrl": "https://...",
   "author": "Tech Team",
   "tags": ["Kafka", "Scale"],
-  "publishedAt": "2026-02-20T08:00:00"
+  "publishedAt": "2026-02-20"
 }
 ```
 

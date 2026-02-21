@@ -5,6 +5,8 @@ import com.techmoa.post.domain.PostRepository;
 import com.techmoa.post.presentation.dto.PostDetailResponse;
 import com.techmoa.post.presentation.dto.PostFeedResponse;
 import com.techmoa.post.presentation.dto.PostItemResponse;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.data.domain.PageRequest;
@@ -27,22 +29,32 @@ public class PostQueryService {
     public PostFeedResponse getFeed(
             Long cursor,
             Integer size,
-            String sourceName,
+            List<Long> sourceIds,
             String tagName,
             String q
     ) {
         int normalizedSize = normalizeSize(size);
-        String normalizedSource = normalizeText(sourceName);
+        List<Long> normalizedSourceIds = normalizeSourceIds(sourceIds);
         String normalizedTagName = normalizeText(tagName);
         String normalizedKeyword = normalizeText(q);
 
-        List<Post> loaded = postRepository.findFeed(
-                cursor,
-                normalizedSource,
-                normalizedTagName,
-                normalizedKeyword,
-                PageRequest.of(0, normalizedSize + 1)
-        );
+        List<Post> loaded;
+        if (normalizedSourceIds == null) {
+            loaded = postRepository.findFeed(
+                    cursor,
+                    normalizedTagName,
+                    normalizedKeyword,
+                    PageRequest.of(0, normalizedSize + 1)
+            );
+        } else {
+            loaded = postRepository.findFeedBySourceIds(
+                    cursor,
+                    normalizedSourceIds,
+                    normalizedTagName,
+                    normalizedKeyword,
+                    PageRequest.of(0, normalizedSize + 1)
+            );
+        }
 
         boolean hasNext = loaded.size() > normalizedSize;
         List<Post> page = hasNext ? loaded.subList(0, normalizedSize) : loaded;
@@ -77,5 +89,25 @@ public class PostQueryService {
             return null;
         }
         return value.trim();
+    }
+
+    private List<Long> normalizeSourceIds(List<Long> sourceIds) {
+        if (sourceIds == null || sourceIds.isEmpty()) {
+            return null;
+        }
+
+        LinkedHashSet<Long> normalized = new LinkedHashSet<>();
+        for (Long sourceId : sourceIds) {
+            if (sourceId == null || sourceId <= 0) {
+                continue;
+            }
+            normalized.add(sourceId);
+        }
+
+        if (normalized.isEmpty()) {
+            return null;
+        }
+
+        return new ArrayList<>(normalized);
     }
 }

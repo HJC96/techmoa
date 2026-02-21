@@ -14,7 +14,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             FROM Post p
             JOIN FETCH p.source s
             WHERE (:cursor IS NULL OR p.id < :cursor)
-              AND (:sourceName IS NULL OR s.name = :sourceName)
               AND (
                 :tagName IS NULL
                 OR EXISTS (
@@ -32,7 +31,35 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             """)
     List<Post> findFeed(
             @Param("cursor") Long cursor,
-            @Param("sourceName") String sourceName,
+            @Param("tagName") String tagName,
+            @Param("q") String q,
+            Pageable pageable
+    );
+
+    @Query("""
+            SELECT p
+            FROM Post p
+            JOIN FETCH p.source s
+            WHERE (:cursor IS NULL OR p.id < :cursor)
+              AND s.id IN :sourceIds
+              AND (
+                :tagName IS NULL
+                OR EXISTS (
+                    SELECT t.id
+                    FROM p.tags t
+                    WHERE t.name = :tagName
+                )
+              )
+              AND (
+                :q IS NULL
+                OR LOWER(p.title) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%'))
+                OR LOWER(COALESCE(p.summary, '')) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%'))
+              )
+            ORDER BY p.id DESC
+            """)
+    List<Post> findFeedBySourceIds(
+            @Param("cursor") Long cursor,
+            @Param("sourceIds") List<Long> sourceIds,
             @Param("tagName") String tagName,
             @Param("q") String q,
             Pageable pageable
