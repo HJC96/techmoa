@@ -37,8 +37,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // 로컬 개발 환경(Vite 기본 포트) 및 모든 오리진 허용 (필요에 따라 조정 가능)
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:5173", "http://127.0.0.1:5173"));
+        // 실제 서비스 IP 및 로컬 개발 환경만 명시적으로 허용
+        configuration.setAllowedOrigins(List.of(
+                "http://43.202.208.107",
+                "http://localhost:5173",
+                "http://127.0.0.1:5173"
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

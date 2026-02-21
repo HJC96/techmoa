@@ -102,6 +102,33 @@
 - 목록 페이지에서 상세 페이지 이동 링크 적용
 - 상세 페이지에서 태그/원문 링크 렌더링
 
+### 2026-02-21 (20차 무한 스크롤 및 배포 준비)
+- `frontend` 무한 스크롤 구현 (Load More 버튼 방식)
+  - `api/posts.ts`: `cursor` 파라미터 추가
+  - `App.tsx`: `useInfiniteQuery` 도입 및 더 보기 버튼 추가
+- `Dockerfile` 작성
+  - `backend/Dockerfile`: Multi-stage build (Gradle build -> JRE alpine)
+  - `frontend/Dockerfile`: Multi-stage build (Node build -> Nginx alpine)
+  - `frontend/nginx.conf`: SPA 라우팅 지원 설정
+- 빌드 검증
+  - `backend`: `./gradlew build` 성공
+  - `frontend`: `npm install && npm run build` 성공
+
+### 2026-02-21 (21차 환경 호환성 및 보안 설정)
+- **PostgreSQL 16 지원**: `backend/build.gradle`에 `flyway-database-postgresql` 의존성 추가 (Flyway 10+ 호환성 해결)
+- **CORS 설정**: `SecurityConfig.java`에 `CorsConfigurationSource` 추가하여 프론트엔드 접속 허용
+- **쿼리 오류 수정**: PostgreSQL `LOWER(bytea)` 오류 해결을 위해 검색 파라미터에 `CAST(:q AS string)` 적용
+- **날짜 포맷 정규화**: `publishedAt`을 서버 응답 시 `yyyy-MM-dd` 문자열로 변환
+
+### 2026-02-21 (22차 AWS EC2 운영 환경 구축 및 배포)
+- **인프라 오케스트레이션**: 루트 `docker-compose.yml` 고도화 (DB, Redis, Backend, Frontend 통합)
+- **운영 프로필 설정**: `application-prod.yml` 추가 및 Docker 환경 변수 연동
+- **EC2 성능 최적화**: 
+  - t2.micro(1GB RAM) 환경을 위한 **Swap Memory(2G)** 설정
+  - Docker Buildx 최신 버전(0.17.1) 수동 업데이트로 빌드 오류 해결
+- **네트워크 설정**: Elastic IP(탄력적 IP) 할당 및 보안 그룹(80, 8080, 22) 설정 가이드
+- **최종 배포 성공**: `docker-compose up -d --build`를 통한 전체 서비스 가동 확인
+
 ## 진행 체크리스트
 - [x] 상위 아키텍처 정의
 - [x] 도메인/DB 모델 정의
@@ -123,48 +150,10 @@
 - [x] 프론트 상세 페이지 라우팅(`/posts/:id`) 구현
 - [x] 단위/슬라이스 테스트 코드 추가
 - [x] 백엔드 자동 테스트 실행 확인
-- [x] 프론트 빌드 실행 확인
-- [ ] 통합 테스트 작성 (현재 단위/슬라이스 중심)
-
-## 2026-02-21 (20차 무한 스크롤 및 배포 준비)
-- `frontend` 무한 스크롤 구현 (Load More 버튼 방식)
-  - `api/posts.ts`: `cursor` 파라미터 추가
-  - `App.tsx`: `useInfiniteQuery` 도입 및 더 보기 버튼 추가
-- `Dockerfile` 작성
-  - `backend/Dockerfile`: Multi-stage build (Gradle build -> JRE alpine)
-  - `frontend/Dockerfile`: Multi-stage build (Node build -> Nginx alpine)
-  - `frontend/nginx.conf`: SPA 라우팅 지원 설정
-- 빌드 검증
-  - `backend`: `./gradlew build` 성공
-  - `frontend`: `npm install && npm run build` 성공
-- RSS 소스 접근성 검증
-  - 카카오, 인프런, 토스 RSS 접근 확인 완료
-
-## 2026-02-21 (21차 안정성/개선 반영)
-- 배포 안정성 개선
-  - `backend/build.gradle`: `bootJar` 산출물 `app.jar` 고정
-  - `backend/build.gradle`: `jar` task 비활성화로 중복 산출물 제거
-  - `backend/Dockerfile`: `build/libs/app.jar` 단일 복사로 이미지 빌드 안정화
-  - `frontend/Dockerfile`: `npm install` -> `npm ci`로 재현성 개선
-- 빌드 컨텍스트 최적화
-  - `backend/.dockerignore`, `frontend/.dockerignore` 추가
-  - `techmoa/.gitignore`에 IDE 파일 무시 규칙 추가
-- 보안/품질 개선
-  - `SecurityConfig` 비밀번호 인코더 `BCrypt` 적용
-  - `AdminSourceControllerSecurityTest`의 deprecated `@MockBean` -> `@MockitoBean` 변경
-- 프론트 UX 개선
-  - 검색 결과가 없을 때 빈 상태 메시지 표시
-  - 더보기 버튼 비활성 상태/스타일 처리
-  - `cursor` 파라미터 직렬화 조건 보정 (`null/undefined`만 제외)
-- 재검증
-  - `backend`: `./gradlew test` 성공
-  - `frontend`: `npm run build` 성공
-
-## 다음 단계
-1. 통합 테스트 작성 (API + DB + Flyway 실제 시나리오)
-2. E2E 테스트 도입 검토 (Playwright)
-3. 운영 알림(Slack/Webhook) 및 장애 대응 자동화
-4. 수집 결과 대시보드(`sync_jobs` 기반) 추가
+- [x] 무한 스크롤/커서 pagination UI 적용
+- [x] Docker 기반 배포 환경 구축 (Dockerfile, Compose)
+- [x] AWS EC2 실서버 배포 및 운영 환경 최적화
+- [ ] 통합 테스트 작성 및 E2E 테스트 검토
 
 ## 확인 필요 이슈
 - 현재 로컬 `gradle` 명령은 네이티브 라이브러리 로딩 오류로 실행 실패 (wrapper로 우회)
