@@ -66,16 +66,17 @@ public class RssTechBlogParser implements TechBlogParser {
                 entry.getDescription() == null ? null : entry.getDescription().getValue(),
                 entry.getAuthor(),
                 resolveThumbnailUrl(entry, canonicalUrl, sourceProfile.baseUrl()),
-                resolvePublishedAt(entry.getPublishedDate()),
+                resolvePublishedAt(entry.getPublishedDate(), entry.getUpdatedDate()),
                 resolveTags(entry.getCategories())
         );
     }
 
-    private LocalDateTime resolvePublishedAt(Date publishedDate) {
-        if (publishedDate == null) {
+    private LocalDateTime resolvePublishedAt(Date publishedDate, Date updatedDate) {
+        Date resolvedDate = publishedDate == null ? updatedDate : publishedDate;
+        if (resolvedDate == null) {
             return LocalDateTime.now();
         }
-        return LocalDateTime.ofInstant(publishedDate.toInstant(), ZoneId.systemDefault());
+        return LocalDateTime.ofInstant(resolvedDate.toInstant(), ZoneId.systemDefault());
     }
 
     private List<String> resolveTags(List<SyndCategory> categories) {

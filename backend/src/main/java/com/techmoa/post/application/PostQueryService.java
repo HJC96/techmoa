@@ -5,6 +5,7 @@ import com.techmoa.post.domain.PostRepository;
 import com.techmoa.post.presentation.dto.PostDetailResponse;
 import com.techmoa.post.presentation.dto.PostFeedResponse;
 import com.techmoa.post.presentation.dto.PostItemResponse;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -37,18 +38,21 @@ public class PostQueryService {
         List<Long> normalizedSourceIds = normalizeSourceIds(sourceIds);
         String normalizedTagName = normalizeText(tagName);
         String normalizedKeyword = normalizeText(q);
+        CursorAnchor cursorAnchor = resolveCursorAnchor(cursor);
 
         List<Post> loaded;
         if (normalizedSourceIds == null) {
             loaded = postRepository.findFeed(
-                    cursor,
+                    cursorAnchor == null ? null : cursorAnchor.id(),
+                    cursorAnchor == null ? null : cursorAnchor.publishedAt(),
                     normalizedTagName,
                     normalizedKeyword,
                     PageRequest.of(0, normalizedSize + 1)
             );
         } else {
             loaded = postRepository.findFeedBySourceIds(
-                    cursor,
+                    cursorAnchor == null ? null : cursorAnchor.id(),
+                    cursorAnchor == null ? null : cursorAnchor.publishedAt(),
                     normalizedSourceIds,
                     normalizedTagName,
                     normalizedKeyword,
@@ -72,6 +76,16 @@ public class PostQueryService {
         Post post = postRepository.findDetailById(postId)
                 .orElseThrow(() -> new NoSuchElementException("Post not found: " + postId));
         return PostDetailResponse.from(post);
+    }
+
+    private CursorAnchor resolveCursorAnchor(Long cursorId) {
+        if (cursorId == null) {
+            return null;
+        }
+
+        return postRepository.findById(cursorId)
+                .map(post -> new CursorAnchor(post.getId(), post.getPublishedAt()))
+                .orElse(null);
     }
 
     private int normalizeSize(Integer size) {
@@ -109,5 +123,8 @@ public class PostQueryService {
         }
 
         return new ArrayList<>(normalized);
+    }
+
+    private record CursorAnchor(Long id, LocalDateTime publishedAt) {
     }
 }

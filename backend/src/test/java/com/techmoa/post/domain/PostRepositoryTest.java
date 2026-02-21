@@ -83,12 +83,29 @@ class PostRepositoryTest {
                 null,
                 null,
                 null,
+                null,
                 PageRequest.of(0, 20)
         );
 
         assertThat(posts).hasSize(3);
+        assertThat(posts)
+                .extracting(Post::getTitle)
+                .containsExactly("C 글", "B 글", "A 글");
+
+        Post second = posts.get(1);
+        List<Post> nextPage = postRepository.findFeed(
+                second.getId(),
+                second.getPublishedAt(),
+                null,
+                null,
+                PageRequest.of(0, 20)
+        );
+        assertThat(nextPage)
+                .extracting(Post::getTitle)
+                .containsExactly("A 글");
 
         posts = postRepository.findFeedBySourceIds(
+                null,
                 null,
                 List.of(sourceA.getId(), sourceB.getId()),
                 null,

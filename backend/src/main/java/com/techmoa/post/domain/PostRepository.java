@@ -1,5 +1,6 @@
 package com.techmoa.post.domain;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,7 +14,11 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             SELECT p
             FROM Post p
             JOIN FETCH p.source s
-            WHERE (:cursor IS NULL OR p.id < :cursor)
+            WHERE (
+                :cursorId IS NULL
+                OR p.publishedAt < :cursorPublishedAt
+                OR (p.publishedAt = :cursorPublishedAt AND p.id < :cursorId)
+              )
               AND (
                 :tagName IS NULL
                 OR EXISTS (
@@ -27,10 +32,11 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                 OR LOWER(p.title) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%'))
                 OR LOWER(COALESCE(p.summary, '')) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%'))
               )
-            ORDER BY p.id DESC
+            ORDER BY p.publishedAt DESC, p.id DESC
             """)
     List<Post> findFeed(
-            @Param("cursor") Long cursor,
+            @Param("cursorId") Long cursorId,
+            @Param("cursorPublishedAt") LocalDateTime cursorPublishedAt,
             @Param("tagName") String tagName,
             @Param("q") String q,
             Pageable pageable
@@ -40,7 +46,11 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             SELECT p
             FROM Post p
             JOIN FETCH p.source s
-            WHERE (:cursor IS NULL OR p.id < :cursor)
+            WHERE (
+                :cursorId IS NULL
+                OR p.publishedAt < :cursorPublishedAt
+                OR (p.publishedAt = :cursorPublishedAt AND p.id < :cursorId)
+              )
               AND s.id IN :sourceIds
               AND (
                 :tagName IS NULL
@@ -55,10 +65,11 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                 OR LOWER(p.title) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%'))
                 OR LOWER(COALESCE(p.summary, '')) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%'))
               )
-            ORDER BY p.id DESC
+            ORDER BY p.publishedAt DESC, p.id DESC
             """)
     List<Post> findFeedBySourceIds(
-            @Param("cursor") Long cursor,
+            @Param("cursorId") Long cursorId,
+            @Param("cursorPublishedAt") LocalDateTime cursorPublishedAt,
             @Param("sourceIds") List<Long> sourceIds,
             @Param("tagName") String tagName,
             @Param("q") String q,
