@@ -12,6 +12,17 @@
 - `frontend/README.md`: 프론트엔드 부트스트랩 가이드
 - `docker-compose.yml`: 로컬 PostgreSQL/Redis 실행
 
+## 실행 방법
+
+### 로컬 실행
+1.  **DB 및 Redis 실행**: `docker-compose up -d postgres redis`
+2.  **백엔드 실행**: `cd backend && ./gradlew bootRun --args='--spring.profiles.active=local'`
+3.  **프론트엔드 실행**: `cd frontend && npm install && npm run dev`
+
+### 전체 배포 (Docker Compose)
+1.  **빌드 및 실행**: `docker-compose up -d --build`
+2.  **정지 및 삭제**: `docker-compose down`
+
 ## 현재 상태
 - [x] 요구사항 기반 초안 아키텍처 정의
 - [x] MVP 데이터 모델 정의

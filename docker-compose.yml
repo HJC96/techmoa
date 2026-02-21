@@ -1,9 +1,8 @@
-version: "3.9"
-
 services:
   postgres:
     image: postgres:16
     container_name: techmoa-postgres
+    restart: always
     environment:
       POSTGRES_DB: techmoa
       POSTGRES_USER: techmoa
@@ -16,10 +15,43 @@ services:
   redis:
     image: redis:7
     container_name: techmoa-redis
+    restart: always
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: techmoa-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/techmoa
+      - SPRING_DATASOURCE_USERNAME=techmoa
+      - SPRING_DATASOURCE_PASSWORD=techmoa
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - TECHMOA_ADMIN_USERNAME=admin
+      - TECHMOA_ADMIN_PASSWORD=admin1234
+    depends_on:
+      - postgres
+      - redis
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: techmoa-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
