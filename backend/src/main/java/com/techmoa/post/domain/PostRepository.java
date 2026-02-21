@@ -1,0 +1,51 @@
+package com.techmoa.post.domain;
+
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
+
+public interface PostRepository extends JpaRepository<Post, Long> {
+
+    @Query("""
+            SELECT p
+            FROM Post p
+            JOIN FETCH p.source s
+            WHERE (:cursor IS NULL OR p.id < :cursor)
+              AND (:sourceName IS NULL OR s.name = :sourceName)
+              AND (
+                :tagName IS NULL
+                OR EXISTS (
+                    SELECT t.id
+                    FROM p.tags t
+                    WHERE t.name = :tagName
+                )
+              )
+              AND (
+                :q IS NULL
+                OR LOWER(p.title) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%'))
+                OR LOWER(COALESCE(p.summary, '')) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%'))
+              )
+            ORDER BY p.id DESC
+            """)
+    List<Post> findFeed(
+            @Param("cursor") Long cursor,
+            @Param("sourceName") String sourceName,
+            @Param("tagName") String tagName,
+            @Param("q") String q,
+            Pageable pageable
+    );
+
+    Optional<Post> findByCanonicalUrl(String canonicalUrl);
+
+    @Query("""
+            SELECT DISTINCT p
+            FROM Post p
+            JOIN FETCH p.source s
+            LEFT JOIN FETCH p.tags t
+            WHERE p.id = :id
+            """)
+    Optional<Post> findDetailById(@Param("id") Long id);
+}

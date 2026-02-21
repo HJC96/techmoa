@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: techmoa-backend
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+techmoa:
+  sync:
+    fixed-delay-ms: 600000
