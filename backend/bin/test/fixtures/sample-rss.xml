@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>TechMoa Test Feed</title>
+    <link>https://example.com</link>
+    <description>test feed</description>
+    <item>
+      <title>Post A</title>
+      <link>https://example.com/a</link>
+      <description><![CDATA[Summary A <img src="https://images.example.com/a.png" />]]></description>
+      <pubDate>Fri, 20 Feb 2026 08:00:00 +0900</pubDate>
+      <author>Author A</author>
+      <category>Java</category>
+      <category>Spring</category>
+    </item>
+    <item>
+      <title>Post B</title>
+      <link>https://example.com/b</link>
+      <description>Summary B</description>
+      <pubDate>Thu, 19 Feb 2026 10:30:00 +0900</pubDate>
+      <author>Author B</author>
+      <enclosure url="https://images.example.com/b.jpg" type="image/jpeg" />
+      <category>React</category>
+    </item>
+    <item>
+      <title>Post C</title>
+      <link>https://example.com/c</link>
+      <description><![CDATA[
+        Summary C
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAUEBA==" data-src="/images/c.png" />
+      ]]></description>
+      <pubDate>Wed, 18 Feb 2026 09:20:00 +0900</pubDate>
+      <author>Author C</author>
+    </item>
+  </channel>
+</rss>
