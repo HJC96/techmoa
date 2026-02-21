@@ -1,5 +1,16 @@
 # Infra Improvements
 
+## 최근 반영 이력
+### 2026-02-21. IP 접속 시 도메인 HTTPS 강제 리다이렉트
+1. 리다이렉트 정책 정리
+- `frontend/nginx.conf`에서 기본 80 서버(`default_server`)를 추가해 IP/기타 호스트 접속을 모두 `https://techmoa.today`로 리다이렉트
+2. Nginx 구성 단순화
+- 중복된 80/443 블록을 정리해 `80 리다이렉트 1개 + 443 서비스 1개 + 443 정규화 리다이렉트 1개` 구조로 최적화
+3. 도메인/IP 정규화
+- `www.techmoa.today`, `43.202.208.107` 접근을 `https://techmoa.today`로 통일
+4. API 프록시 유지
+- HTTPS 서버의 `/api` 프록시(`techmoa-backend:8080`)는 기존 동작 유지
+
 ## 1. 네트워크/보안 구성 개선
 1. 리버스 프록시 적용
 - 외부 노출은 80 포트 중심으로 단순화하고 백엔드 직접 노출(8080) 최소화
