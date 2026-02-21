@@ -4,6 +4,9 @@
 
 TechMoa는 국내외 주요 기업 및 개인 테크 블로그의 양질의 콘텐츠를 자동으로 수집하여, 개발자들이 최신 기술 트렌드를 놓치지 않고 탐색할 수 있도록 돕는 서비스입니다.
 
+<img width="992" height="748" alt="image" src="https://github.com/user-attachments/assets/e0f1a961-2ff0-4175-8f2b-1c16adefa035" />
+
+
 ---
 
 ## 🏗 System Architecture
