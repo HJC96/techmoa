@@ -117,7 +117,7 @@ export function App() {
     <main className="layout">
       <header className="hero">
         <p className="hero-eyebrow">TechMoa</p>
-        <h1 className="hero-headline">오늘 어떤 기술을 읽어볼까요?</h1>
+        <h1 className="hero-headline">오늘 어떤 글을 읽어볼까요?</h1>
         <p className="hero-subcopy">
           테크 블로그의 최신 글을 한눈에 확인하세요.
         </p>
