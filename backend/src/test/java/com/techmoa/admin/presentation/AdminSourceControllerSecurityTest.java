@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.techmoa.common.config.SecurityConfig;
 import com.techmoa.ingestion.application.SourceSyncService;
+import com.techmoa.ingestion.application.SyncResult;
 import com.techmoa.ingestion.parser.ParserType;
 import com.techmoa.source.application.SourceService;
 import com.techmoa.source.domain.Source;
@@ -84,6 +85,23 @@ class AdminSourceControllerSecurityTest {
                                   "active":true
                                 }
                                 """))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void backfill_requiresAuthentication() throws Exception {
+        mockMvc.perform(post("/api/admin/sources/1/backfill"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void backfill_acceptsAuthenticatedAdmin() throws Exception {
+        when(sourceSyncService.backfillSourceById(eq(1L), anyString()))
+                .thenReturn(new SyncResult("카카오테크", 120, 118));
+
+        mockMvc.perform(post("/api/admin/sources/1/backfill")
+                        .with(httpBasic("admin", "admin1234"))
+                        .queryParam("sitemapUrl", "https://tech.kakao.com/sitemap.xml"))
                 .andExpect(status().isOk());
     }
 }

@@ -1,7 +1,8 @@
 :root {
   font-family: "Pretendard", "Noto Sans KR", sans-serif;
   color: #1f2937;
-  background: #f4f6fb;
+  --page-sky-bg: linear-gradient(90deg, #ffffff 0%, #fbfdff 58%, #f2f8ff 100%);
+  background: var(--page-sky-bg);
   --mint-500: #14b8a6;
   --mint-100: #ccfbf1;
   --slate-900: #0f172a;
@@ -15,6 +16,7 @@
 
 body {
   margin: 0;
+  background: var(--page-sky-bg);
 }
 
 .layout {
@@ -25,23 +27,42 @@ body {
 
 .hero {
   border-radius: 14px;
-  background: linear-gradient(135deg, #e2e8f0, #f8fafc);
+  border: none;
+  background: var(--page-sky-bg);
   padding: 24px;
+  box-shadow: none;
 }
 
-.hero h1 {
+.hero-eyebrow {
   margin: 0;
-  font-size: 32px;
+  color: #0f766e;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-.hero p {
+.hero-headline {
   margin: 8px 0 0;
+  font-size: clamp(28px, 5vw, 40px);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.hero-subcopy {
+  margin: 12px 0 0;
+  max-width: 640px;
+  font-size: clamp(14px, 2vw, 17px);
+  line-height: 1.55;
+  color: #334155;
 }
 
 .panel {
   margin-top: 20px;
   border-radius: 14px;
-  background: white;
+  border: 1px solid #e5e7eb;
+  background: var(--page-sky-bg);
   padding: 20px;
 }
 
@@ -49,11 +70,8 @@ body {
   margin-bottom: 18px;
   padding: 16px;
   border-radius: 16px;
-  border: 1px solid var(--line-soft);
-  background:
-    radial-gradient(circle at 8% 6%, #f0fdfa 0%, transparent 34%),
-    radial-gradient(circle at 95% 95%, #eef2ff 0%, transparent 36%),
-    #f8fafc;
+  border: 1px solid #e5e7eb;
+  background: var(--page-sky-bg);
 }
 
 .source-explorer-head {
@@ -134,9 +152,9 @@ body {
 }
 
 .source-logo-image {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
   object-fit: cover;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
@@ -144,9 +162,9 @@ body {
 }
 
 .source-logo-fallback {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -174,7 +192,7 @@ body {
   border: 1px solid #e5e7eb;
   border-radius: 14px;
   padding: 12px;
-  background: #fff;
+  background: var(--page-sky-bg);
 }
 
 .thumbnail-link {
@@ -325,17 +343,18 @@ body {
   margin: 12px 0 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(162px, 198px));
+  justify-content: start;
   gap: 8px;
 }
 
 .source-box {
   width: 100%;
-  min-height: 68px;
+  min-height: 52px;
   border-radius: 12px;
   border: 1px solid #dbe3ef;
-  background: linear-gradient(180deg, #ffffff, #f8fafc);
-  padding: 10px;
+  background: var(--page-sky-bg);
+  padding: 7px 9px;
   text-align: left;
   cursor: pointer;
   transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
@@ -355,24 +374,27 @@ body {
 .source-box-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  justify-content: flex-start;
+  gap: 6px;
 }
 
 .source-box-host {
+  flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: right;
   color: #475569;
   font-size: 11px;
 }
 
 .source-box-name {
-  margin-top: 7px;
+  margin-top: 5px;
   display: block;
+  text-align: right;
   color: var(--slate-900);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.3;
   overflow: hidden;
@@ -381,6 +403,18 @@ body {
 }
 
 @media (max-width: 768px) {
+  .layout {
+    padding-top: 18px;
+  }
+
+  .hero {
+    padding: 20px;
+  }
+
+  .hero-headline {
+    font-size: 30px;
+  }
+
   .post-list {
     grid-template-columns: 1fr;
   }
@@ -403,12 +437,13 @@ body {
   }
 
   .source-box-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(153px, 189px));
+    justify-content: start;
   }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
   .source-box-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(162px, 198px));
   }
 }

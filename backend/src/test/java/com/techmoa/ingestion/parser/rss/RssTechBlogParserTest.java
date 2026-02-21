@@ -28,7 +28,7 @@ class RssTechBlogParserTest {
 
         List<ParsedPost> parsedPosts = parser.fetch(sourceProfile);
 
-        assertThat(parsedPosts).hasSize(2);
+        assertThat(parsedPosts).hasSize(3);
         assertThat(parsedPosts.get(0).title()).isEqualTo("Post A");
         assertThat(parsedPosts.get(0).canonicalUrl()).isEqualTo("https://example.com/a");
         assertThat(parsedPosts.get(0).thumbnailUrl()).isEqualTo("https://images.example.com/a.png");
@@ -36,5 +36,7 @@ class RssTechBlogParserTest {
         assertThat(parsedPosts.get(1).title()).isEqualTo("Post B");
         assertThat(parsedPosts.get(1).thumbnailUrl()).isEqualTo("https://images.example.com/b.jpg");
         assertThat(parsedPosts.get(1).tags()).containsExactly("React");
+        assertThat(parsedPosts.get(2).title()).isEqualTo("Post C");
+        assertThat(parsedPosts.get(2).thumbnailUrl()).isEqualTo("https://example.com/images/c.png");
     }
 }

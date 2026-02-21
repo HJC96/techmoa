@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { fetchPostDetail } from "../api/posts";
@@ -5,12 +6,17 @@ import { fetchPostDetail } from "../api/posts";
 export function PostDetailPage() {
   const { postId } = useParams();
   const numericPostId = Number(postId);
+  const [isThumbnailBroken, setIsThumbnailBroken] = useState(false);
 
   const postQuery = useQuery({
     queryKey: ["post-detail", numericPostId],
     queryFn: () => fetchPostDetail(numericPostId),
     enabled: Number.isFinite(numericPostId)
   });
+
+  useEffect(() => {
+    setIsThumbnailBroken(false);
+  }, [postQuery.data?.thumbnailUrl]);
 
   if (!Number.isFinite(numericPostId)) {
     return (
@@ -45,9 +51,15 @@ export function PostDetailPage() {
         목록으로
       </Link>
       <article className="panel">
-        {post.thumbnailUrl && (
+        {post.thumbnailUrl && !isThumbnailBroken && (
           <div className="detail-thumbnail-wrap">
-            <img className="detail-thumbnail" src={post.thumbnailUrl} alt={`${post.title} 썸네일`} loading="lazy" />
+            <img
+              className="detail-thumbnail"
+              src={post.thumbnailUrl}
+              alt={`${post.title} 썸네일`}
+              loading="lazy"
+              onError={() => setIsThumbnailBroken(true)}
+            />
           </div>
         )}
         <h1>{post.title}</h1>

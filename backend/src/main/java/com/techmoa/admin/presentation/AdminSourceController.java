@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
@@ -58,6 +59,27 @@ public class AdminSourceController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Sync failed");
+        }
+    }
+
+    @PostMapping("/{id}/backfill")
+    public ManualSyncResponse backfillSource(
+            @PathVariable("id") Long sourceId,
+            @RequestParam(value = "sitemapUrl", required = false) String sitemapUrl
+    ) {
+        try {
+            SyncResult result = sourceSyncService.backfillSourceById(sourceId, sitemapUrl);
+            return new ManualSyncResponse(
+                    sourceId,
+                    result.sourceName(),
+                    result.parsedCount(),
+                    result.savedCount(),
+                    "COMPLETED"
+            );
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Backfill failed");
         }
     }
 

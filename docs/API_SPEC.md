@@ -121,6 +121,26 @@ Base URL: `/api`
 }
 ```
 
+## 7. 관리자 히스토리 백필(전체 수집)
+`POST /admin/sources/{id}/backfill?sitemapUrl={optionalSitemapUrl}`
+
+구현 상태: `구현 완료` (동기 실행)
+
+설명
+- RSS 최신분이 아닌, 사이트맵 기반으로 과거 글까지 한 번에 수집합니다.
+- `sitemapUrl`을 생략하면 `robots.txt`의 `Sitemap:` 항목을 우선 사용하고, 없으면 `{baseUrl}/sitemap.xml`을 시도합니다.
+
+응답
+```json
+{
+  "sourceId": 1,
+  "sourceName": "카카오테크",
+  "parsedCount": 120,
+  "savedCount": 118,
+  "status": "COMPLETED"
+}
+```
+
 ## 에러 포맷
 ```json
 {

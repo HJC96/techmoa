@@ -1,5 +1,6 @@
 package com.techmoa.post.presentation.dto;
 
+import com.techmoa.common.url.UrlResolver;
 import com.techmoa.post.domain.Post;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -22,7 +23,11 @@ public record PostDetailResponse(
                 post.getId(),
                 post.getTitle(),
                 post.getSummary(),
-                post.getThumbnailUrl(),
+                UrlResolver.resolveAbsoluteUrl(
+                        post.getThumbnailUrl(),
+                        post.getCanonicalUrl(),
+                        post.getSource().getBaseUrl()
+                ),
                 post.getSource().getName(),
                 post.getCanonicalUrl(),
                 post.getAuthor(),

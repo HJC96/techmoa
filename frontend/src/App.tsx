@@ -45,6 +45,34 @@ function SourceLogoBadge({ sourceName, baseUrl }: SourceLogoBadgeProps) {
   );
 }
 
+type PostThumbnailProps = {
+  thumbnailUrl: string | null;
+  title: string;
+  sourceName: string;
+};
+
+function PostThumbnail({ thumbnailUrl, title, sourceName }: PostThumbnailProps) {
+  const [isBroken, setIsBroken] = useState(false);
+
+  if (!thumbnailUrl || isBroken) {
+    return (
+      <div className="post-thumbnail-placeholder">
+        <span>{sourceName}</span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      className="post-thumbnail"
+      src={thumbnailUrl}
+      alt={`${title} 썸네일`}
+      loading="lazy"
+      onError={() => setIsBroken(true)}
+    />
+  );
+}
+
 export function App() {
   const [selectedSourceIds, setSelectedSourceIds] = useState<number[]>([]);
   const [titleInput, setTitleInput] = useState("");
@@ -71,11 +99,6 @@ export function App() {
 
   const posts = useMemo(() => postQuery.data?.pages.flatMap((page) => page.items) ?? [], [postQuery.data]);
   const sources = sourceQuery.data ?? [];
-  const selectedSourceNames = useMemo(() => {
-    return sources
-      .filter((item) => selectedSourceIds.includes(item.id))
-      .map((item) => `#${item.name}`);
-  }, [sources, selectedSourceIds]);
 
   function onTitleSearchSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -93,8 +116,11 @@ export function App() {
   return (
     <main className="layout">
       <header className="hero">
-        <h1>TechMoa</h1>
-        <p>여러 테크 블로그의 최신 글을 한 곳에서 확인합니다.</p>
+        <p className="hero-eyebrow">TechMoa</p>
+        <h1 className="hero-headline">오늘 어떤 기술을 읽어볼까요?</h1>
+        <p className="hero-subcopy">
+          테크 블로그의 최신 글을 한눈에 확인하세요.
+        </p>
       </header>
 
       <section className="panel">
@@ -120,11 +146,6 @@ export function App() {
             />
             <button type="submit" className="title-search-button">검색</button>
           </form>
-          {selectedSourceIds.length > 0 && (
-            <p className="source-selected">
-              현재 선택: {selectedSourceNames.join(", ")}
-            </p>
-          )}
           {titleQuery && <p className="source-selected">제목 검색: "{titleQuery}"</p>}
 
           {sourceQuery.isLoading && <p className="source-guide">소스 정보를 불러오는 중...</p>}
@@ -143,7 +164,6 @@ export function App() {
                       <SourceLogoBadge sourceName={item.name} baseUrl={item.baseUrl} />
                       <span className="source-box-host">{resolveSourceHost(item.baseUrl)}</span>
                     </div>
-                    <span className="source-box-name">#{item.name}</span>
                   </button>
                 </li>
               ))}
@@ -161,13 +181,11 @@ export function App() {
           {posts.map((post) => (
             <li key={post.id} className="post-card">
               <Link className="thumbnail-link" to={`/posts/${post.id}`} aria-label={`${post.title} 상세 보기`}>
-                {post.thumbnailUrl ? (
-                  <img className="post-thumbnail" src={post.thumbnailUrl} alt={`${post.title} 썸네일`} loading="lazy" />
-                ) : (
-                  <div className="post-thumbnail-placeholder">
-                    <span>{post.sourceName}</span>
-                  </div>
-                )}
+                <PostThumbnail
+                  thumbnailUrl={post.thumbnailUrl}
+                  title={post.title}
+                  sourceName={post.sourceName}
+                />
               </Link>
               <Link className="post-title" to={`/posts/${post.id}`}>
                 {post.title}

@@ -7,6 +7,7 @@ import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
+import com.techmoa.common.url.UrlResolver;
 import com.techmoa.ingestion.parser.ParsedPost;
 import com.techmoa.ingestion.parser.ParserType;
 import com.techmoa.ingestion.parser.SourceProfile;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -44,7 +46,7 @@ public class RssTechBlogParser implements TechBlogParser {
         try (XmlReader reader = new XmlReader(new URL(sourceProfile.feedUrl()))) {
             SyndFeed feed = new SyndFeedInput().build(reader);
             return feed.getEntries().stream()
-                    .map(this::toParsedPost)
+                    .map(entry -> toParsedPost(entry, sourceProfile))
                     .filter(post -> post.canonicalUrl() != null && !post.canonicalUrl().isBlank())
                     .toList();
         } catch (Exception e) {
@@ -55,13 +57,15 @@ public class RssTechBlogParser implements TechBlogParser {
         }
     }
 
-    private ParsedPost toParsedPost(SyndEntry entry) {
+    private ParsedPost toParsedPost(SyndEntry entry, SourceProfile sourceProfile) {
+        String canonicalUrl = entry.getLink();
+
         return new ParsedPost(
                 entry.getTitle(),
-                entry.getLink(),
+                canonicalUrl,
                 entry.getDescription() == null ? null : entry.getDescription().getValue(),
                 entry.getAuthor(),
-                resolveThumbnailUrl(entry),
+                resolveThumbnailUrl(entry, canonicalUrl, sourceProfile.baseUrl()),
                 resolvePublishedAt(entry.getPublishedDate()),
                 resolveTags(entry.getCategories())
         );
@@ -84,14 +88,16 @@ public class RssTechBlogParser implements TechBlogParser {
                 .toList();
     }
 
-    private String resolveThumbnailUrl(SyndEntry entry) {
-        String enclosureImage = resolveThumbnailFromEnclosures(entry.getEnclosures());
+    private String resolveThumbnailUrl(SyndEntry entry, String canonicalUrl, String sourceBaseUrl) {
+        String enclosureImage = resolveThumbnailFromEnclosures(entry.getEnclosures(), canonicalUrl, sourceBaseUrl);
         if (enclosureImage != null) {
             return enclosureImage;
         }
 
         String descriptionImage = resolveThumbnailFromHtml(
-                entry.getDescription() == null ? null : entry.getDescription().getValue()
+                entry.getDescription() == null ? null : entry.getDescription().getValue(),
+                canonicalUrl,
+                sourceBaseUrl
         );
         if (descriptionImage != null) {
             return descriptionImage;
@@ -102,7 +108,11 @@ public class RssTechBlogParser implements TechBlogParser {
         }
 
         for (SyndContent content : entry.getContents()) {
-            String contentImage = resolveThumbnailFromHtml(content == null ? null : content.getValue());
+            String contentImage = resolveThumbnailFromHtml(
+                    content == null ? null : content.getValue(),
+                    canonicalUrl,
+                    sourceBaseUrl
+            );
             if (contentImage != null) {
                 return contentImage;
             }
@@ -111,7 +121,11 @@ public class RssTechBlogParser implements TechBlogParser {
         return null;
     }
 
-    private String resolveThumbnailFromEnclosures(List<SyndEnclosure> enclosures) {
+    private String resolveThumbnailFromEnclosures(
+            List<SyndEnclosure> enclosures,
+            String canonicalUrl,
+            String sourceBaseUrl
+    ) {
         if (enclosures == null) {
             return null;
         }
@@ -122,6 +136,8 @@ public class RssTechBlogParser implements TechBlogParser {
                 .filter(this::isImageEnclosure)
                 .map(SyndEnclosure::getUrl)
                 .map(String::trim)
+                .map(url -> UrlResolver.resolveAbsoluteUrl(url, canonicalUrl, sourceBaseUrl))
+                .filter(Objects::nonNull)
                 .findFirst()
                 .orElse(null);
     }
@@ -133,20 +149,40 @@ public class RssTechBlogParser implements TechBlogParser {
         return enclosure.getType().toLowerCase(Locale.ROOT).startsWith("image/");
     }
 
-    private String resolveThumbnailFromHtml(String html) {
+    private String resolveThumbnailFromHtml(String html, String canonicalUrl, String sourceBaseUrl) {
         if (html == null || html.isBlank()) {
             return null;
         }
 
-        String src = Jsoup.parse(html)
-                .select("img[src]")
+        return Jsoup.parse(html)
+                .select("img")
                 .stream()
-                .map(element -> element.attr("src"))
-                .filter(value -> value != null && !value.isBlank())
-                .map(String::trim)
+                .map(this::resolveImageCandidate)
+                .filter(Objects::nonNull)
+                .map(url -> UrlResolver.resolveAbsoluteUrl(url, canonicalUrl, sourceBaseUrl))
+                .filter(Objects::nonNull)
                 .findFirst()
                 .orElse(null);
+    }
 
-        return src == null || src.isBlank() ? null : src;
+    private String resolveImageCandidate(Element imageElement) {
+        String[] candidateAttributes = {"data-src", "data-original", "data-lazy-src", "src"};
+        for (String attribute : candidateAttributes) {
+            String value = imageElement.attr(attribute);
+            if (value == null) {
+                continue;
+            }
+            String trimmed = value.trim();
+            if (trimmed.isBlank()) {
+                continue;
+            }
+
+            String lower = trimmed.toLowerCase(Locale.ROOT);
+            if (lower.startsWith("data:") || lower.startsWith("javascript:")) {
+                continue;
+            }
+            return trimmed;
+        }
+        return null;
     }
 }

@@ -61,3 +61,4 @@ com.techmoa
 
 ## 7. 개선사항 위치
 - 아키텍처/확장 로드맵은 `docs/improvements/PROJECT_IMPROVEMENTS.md`, `docs/improvements/INFRA_IMPROVEMENTS.md`에서 관리합니다.
+- API별 호출 순서는 `docs/BACKEND_SEQUENCE_DIAGRAM.md`에서 관리합니다.

@@ -22,5 +22,15 @@
       <enclosure url="https://images.example.com/b.jpg" type="image/jpeg" />
       <category>React</category>
     </item>
+    <item>
+      <title>Post C</title>
+      <link>https://example.com/c</link>
+      <description><![CDATA[
+        Summary C
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAUEBA==" data-src="/images/c.png" />
+      ]]></description>
+      <pubDate>Wed, 18 Feb 2026 09:20:00 +0900</pubDate>
+      <author>Author C</author>
+    </item>
   </channel>
 </rss>
